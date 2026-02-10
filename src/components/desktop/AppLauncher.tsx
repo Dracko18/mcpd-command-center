@@ -1,12 +1,12 @@
 import React from 'react';
-import { Users, FileText, Shield, Settings, LogOut } from 'lucide-react';
+import { Users, FileText, Shield, Settings, LogOut, Car, ClipboardList, ShieldAlert } from 'lucide-react';
 import { MCPD_APPS } from '@/config/apps';
 import { useWindowStore, type MCPDApp } from '@/stores/windowStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
-  Users, FileText, Shield, Settings,
+  Users, FileText, Shield, Settings, Car, ClipboardList, ShieldAlert,
 };
 
 interface AppLauncherProps {
@@ -16,12 +16,13 @@ interface AppLauncherProps {
 
 const AppLauncher: React.FC<AppLauncherProps> = ({ open, onClose }) => {
   const { openApp } = useWindowStore();
-  const { profile, isAdmin, signOut } = useAuth();
+  const { profile, isAdmin, roles, signOut } = useAuth();
 
   if (!open) return null;
 
   const visibleApps = MCPD_APPS.filter(app => {
     if (app.adminOnly && !isAdmin) return false;
+    if (app.rolesRequired && !app.rolesRequired.some(r => roles.includes(r as any))) return false;
     return true;
   });
 

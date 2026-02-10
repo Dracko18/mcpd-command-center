@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import { useWindowStore } from '@/stores/windowStore';
+import { MCPD_APPS } from '@/config/apps';
 import AppWindow from './AppWindow';
 import Taskbar from './Taskbar';
 import AppLauncher from './AppLauncher';
 import SubjectsApp from '@/components/apps/SubjectsApp';
 import RecordsApp from '@/components/apps/RecordsApp';
+import VehiclesApp from '@/components/apps/VehiclesApp';
+import ReportsApp from '@/components/apps/ReportsApp';
+import InternalAffairsApp from '@/components/apps/InternalAffairsApp';
 import AdminApp from '@/components/apps/AdminApp';
 import SettingsApp from '@/components/apps/SettingsApp';
 
 const appComponents: Record<string, React.FC> = {
   SubjectsApp,
   RecordsApp,
+  VehiclesApp,
+  ReportsApp,
+  InternalAffairsApp,
   AdminApp,
   SettingsApp,
 };
@@ -34,11 +41,9 @@ const Desktop: React.FC = () => {
 
         {/* Windows */}
         {windows.map(win => {
-          const Component = appComponents[win.appId === 'subjects' ? 'SubjectsApp'
-            : win.appId === 'records' ? 'RecordsApp'
-            : win.appId === 'admin' ? 'AdminApp'
-            : win.appId === 'settings' ? 'SettingsApp'
-            : 'SubjectsApp'];
+          const app = MCPD_APPS.find(a => a.id === win.appId);
+          const Component = app ? appComponents[app.component] : null;
+          if (!Component) return null;
           return (
             <AppWindow key={win.id} window={win}>
               <Component />
