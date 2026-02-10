@@ -1,12 +1,12 @@
 import React from 'react';
-import { Users, FileText, Shield, Settings, LogOut, Car, ClipboardList, ShieldAlert } from 'lucide-react';
+import { Users, FileText, Shield, Settings, LogOut, Car, ClipboardList, ShieldAlert, Bot } from 'lucide-react';
 import { MCPD_APPS } from '@/config/apps';
 import { useWindowStore, type MCPDApp } from '@/stores/windowStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
-  Users, FileText, Shield, Settings, Car, ClipboardList, ShieldAlert,
+  Users, FileText, Shield, Settings, Car, ClipboardList, ShieldAlert, Bot,
 };
 
 interface AppLauncherProps {

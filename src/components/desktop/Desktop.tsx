@@ -11,6 +11,7 @@ import ReportsApp from '@/components/apps/ReportsApp';
 import InternalAffairsApp from '@/components/apps/InternalAffairsApp';
 import AdminApp from '@/components/apps/AdminApp';
 import SettingsApp from '@/components/apps/SettingsApp';
+import AIAssistantApp from '@/components/apps/AIAssistantApp';
 
 const appComponents: Record<string, React.FC> = {
   SubjectsApp,
@@ -20,6 +21,7 @@ const appComponents: Record<string, React.FC> = {
   InternalAffairsApp,
   AdminApp,
   SettingsApp,
+  AIAssistantApp,
 };
 
 const Desktop: React.FC = () => {
