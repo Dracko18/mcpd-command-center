@@ -12,6 +12,7 @@ import InternalAffairsApp from '@/components/apps/InternalAffairsApp';
 import AdminApp from '@/components/apps/AdminApp';
 import SettingsApp from '@/components/apps/SettingsApp';
 import AIAssistantApp from '@/components/apps/AIAssistantApp';
+import mcpdLogo from '@/assets/mcpd-logo.png';
 
 const appComponents: Record<string, React.FC> = {
   SubjectsApp,
@@ -35,7 +36,8 @@ const Desktop: React.FC = () => {
         {/* Wallpaper overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-mdc-navy via-background to-mdc-charcoal opacity-80" />
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-          <div className="text-center opacity-10">
+          <div className="text-center opacity-15">
+            <img src={mcpdLogo} alt="MCPD" className="w-24 h-24 mx-auto mb-4 opacity-60" />
             <p className="text-6xl font-mono font-bold tracking-widest text-primary">MCPD</p>
             <p className="text-sm font-mono tracking-[0.5em] text-muted-foreground mt-2">MOBILE DATA COMPUTER</p>
           </div>

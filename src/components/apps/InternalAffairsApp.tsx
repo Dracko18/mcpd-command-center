@@ -9,8 +9,21 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type IAComplaint = Tables<'ia_complaints'>;
 
-const CATEGORIES = ['excessive_force', 'misconduct', 'corruption', 'discrimination', 'neglect_of_duty', 'policy_violation', 'other'];
-const IA_STATUSES = ['open', 'investigating', 'review', 'closed'];
+const CATEGORIES: Record<string, string> = {
+  excessive_force: 'Uso excesivo de fuerza',
+  misconduct: 'Mala conducta',
+  corruption: 'Corrupción',
+  discrimination: 'Discriminación',
+  neglect_of_duty: 'Negligencia',
+  policy_violation: 'Violación de protocolo',
+  other: 'Otro',
+};
+const IA_STATUSES: Record<string, string> = {
+  open: 'Abierto',
+  investigating: 'Investigando',
+  review: 'En revisión',
+  closed: 'Cerrado',
+};
 
 const InternalAffairsApp: React.FC = () => {
   const { user } = useAuth();
@@ -76,23 +89,23 @@ const InternalAffairsApp: React.FC = () => {
     return (
       <div className="p-4 h-full overflow-auto">
         <button onClick={() => setSelected(null)} className="flex items-center gap-1 text-xs text-primary mb-4 hover:underline">
-          <ArrowLeft className="w-3 h-3" /> Back to list
+          <ArrowLeft className="w-3 h-3" /> Volver a la lista
         </button>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-mono font-semibold text-foreground flex-1">{selected.complaint_number}</h2>
-            <span className={`px-2 py-0.5 rounded text-xs font-mono ${statusColor(selected.status)}`}>{selected.status.toUpperCase()}</span>
+            <span className={`px-2 py-0.5 rounded text-xs font-mono ${statusColor(selected.status)}`}>{(IA_STATUSES[selected.status] || selected.status).toUpperCase()}</span>
           </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div><span className="text-muted-foreground text-xs font-mono">Category:</span><p>{selected.category.replace(/_/g, ' ').toUpperCase()}</p></div>
-            <div><span className="text-muted-foreground text-xs font-mono">Subject Officer:</span><p>{officer?.full_name || selected.subject_officer_id}</p></div>
-            <div><span className="text-muted-foreground text-xs font-mono">Complainant:</span><p>{selected.complainant_name || '—'}</p></div>
-            <div><span className="text-muted-foreground text-xs font-mono">Type:</span><p>{selected.complainant_type}</p></div>
-            <div><span className="text-muted-foreground text-xs font-mono">Outcome:</span><p>{selected.outcome || 'Pending'}</p></div>
-            <div><span className="text-muted-foreground text-xs font-mono">Filed:</span><p>{new Date(selected.created_at).toLocaleDateString()}</p></div>
+            <div><span className="text-muted-foreground text-xs font-mono">Categoría:</span><p>{CATEGORIES[selected.category] || selected.category}</p></div>
+            <div><span className="text-muted-foreground text-xs font-mono">Oficial investigado:</span><p>{officer?.full_name || selected.subject_officer_id}</p></div>
+            <div><span className="text-muted-foreground text-xs font-mono">Denunciante:</span><p>{selected.complainant_name || '—'}</p></div>
+            <div><span className="text-muted-foreground text-xs font-mono">Tipo:</span><p>{selected.complainant_type === 'civilian' ? 'Civil' : selected.complainant_type === 'officer' ? 'Oficial' : 'Anónimo'}</p></div>
+            <div><span className="text-muted-foreground text-xs font-mono">Resultado:</span><p>{selected.outcome || 'Pendiente'}</p></div>
+            <div><span className="text-muted-foreground text-xs font-mono">Fecha:</span><p>{new Date(selected.created_at).toLocaleDateString()}</p></div>
           </div>
           <div>
-            <span className="text-muted-foreground text-xs font-mono">Description:</span>
+            <span className="text-muted-foreground text-xs font-mono">Descripción:</span>
             <p className="text-sm whitespace-pre-wrap mt-1">{selected.description}</p>
           </div>
         </div>
@@ -104,32 +117,32 @@ const InternalAffairsApp: React.FC = () => {
     return (
       <div className="p-4 h-full">
         <button onClick={() => { setCreating(false); }} className="flex items-center gap-1 text-xs text-primary mb-4 hover:underline">
-          <ArrowLeft className="w-3 h-3" /> Cancel
+          <ArrowLeft className="w-3 h-3" /> Cancelar
         </button>
-        <h2 className="text-sm font-mono font-semibold mb-4">FILE IA COMPLAINT</h2>
+        <h2 className="text-sm font-mono font-semibold mb-4">NUEVA QUEJA IA</h2>
         <form onSubmit={handleCreate} className="space-y-3">
           <div>
-            <label className="text-xs font-mono text-muted-foreground">SUBJECT OFFICER *</label>
+            <label className="text-xs font-mono text-muted-foreground">OFICIAL INVESTIGADO *</label>
             <select value={form.subject_officer_id} onChange={e => setForm(f => ({ ...f, subject_officer_id: e.target.value }))}
               className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
-              <option value="">Select officer...</option>
+              <option value="">Seleccionar oficial...</option>
               {officers.map(o => <option key={o.user_id} value={o.user_id}>{o.full_name} (#{o.badge_number})</option>)}
             </select>
           </div>
           <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
             className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
-            {CATEGORIES.map(c => <option key={c} value={c}>{c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>)}
+            {Object.entries(CATEGORIES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
-          <Input placeholder="Complainant Name" value={form.complainant_name} onChange={e => setForm(f => ({ ...f, complainant_name: e.target.value }))} className="bg-secondary/50 text-sm" />
+          <Input placeholder="Nombre del denunciante" value={form.complainant_name} onChange={e => setForm(f => ({ ...f, complainant_name: e.target.value }))} className="bg-secondary/50 text-sm" />
           <select value={form.complainant_type} onChange={e => setForm(f => ({ ...f, complainant_type: e.target.value }))}
             className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
-            <option value="civilian">Civilian</option>
-            <option value="officer">Officer</option>
-            <option value="anonymous">Anonymous</option>
+            <option value="civilian">Civil</option>
+            <option value="officer">Oficial</option>
+            <option value="anonymous">Anónimo</option>
           </select>
-          <textarea placeholder="Description *" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+          <textarea placeholder="Descripción *" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={4} />
-          <Button type="submit" className="w-full font-mono text-xs" disabled={loading || !form.subject_officer_id}>FILE COMPLAINT</Button>
+          <Button type="submit" className="w-full font-mono text-xs" disabled={loading || !form.subject_officer_id}>PRESENTAR QUEJA</Button>
         </form>
       </div>
     );
@@ -139,9 +152,9 @@ const InternalAffairsApp: React.FC = () => {
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border flex items-center gap-2">
         <Search className="w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search complaints..." value={search} onChange={e => setSearch(e.target.value)} className="bg-secondary/50 text-sm h-8 flex-1" />
+        <Input placeholder="Buscar quejas..." value={search} onChange={e => setSearch(e.target.value)} className="bg-secondary/50 text-sm h-8 flex-1" />
         <Button size="sm" onClick={() => { setCreating(true); fetchOfficers(); }} className="font-mono text-xs gap-1">
-          <Plus className="w-3 h-3" /> New
+          <Plus className="w-3 h-3" /> Nueva
         </Button>
       </div>
       <ScrollArea className="flex-1">
@@ -156,14 +169,14 @@ const InternalAffairsApp: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium font-mono">{c.complaint_number}</p>
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 ${statusColor(c.status)}`}>{c.status}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono shrink-0 ${statusColor(c.status)}`}>{IA_STATUSES[c.status] || c.status}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">{c.category.replace(/_/g, ' ')} • {c.complainant_name || 'Anonymous'}</p>
+                <p className="text-xs text-muted-foreground">{CATEGORIES[c.category] || c.category} • {c.complainant_name || 'Anónimo'}</p>
               </div>
             </button>
           ))}
           {complaints.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-8 font-mono">No complaints found</p>
+            <p className="text-xs text-muted-foreground text-center py-8 font-mono">No se encontraron quejas</p>
           )}
         </div>
       </ScrollArea>
