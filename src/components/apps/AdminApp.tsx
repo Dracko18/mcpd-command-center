@@ -9,14 +9,31 @@ import type { Tables } from '@/integrations/supabase/types';
 type Profile = Tables<'profiles'>;
 type Division = Tables<'divisions'>;
 
+const RANKS = [
+  { value: 'Enforcer I [ENF-I]', label: '01 - Enforcer I [ENF-I]' },
+  { value: 'Enforcer II [ENF-II]', label: '02 - Enforcer II [ENF-II]' },
+  { value: 'Enforcer III [ENF-III]', label: '03 - Enforcer III [ENF-III]' },
+  { value: 'Elite Enforcer [E-ENF]', label: '04 - Elite Enforcer [E-ENF]' },
+  { value: 'Sentinel I [SEN-I]', label: '05 - Sentinel I [SEN-I]' },
+  { value: 'Sentinel II [SEN-II]', label: '06 - Sentinel II [SEN-II]' },
+  { value: 'Warden [WRN]', label: '07 - Warden [WRN]' },
+  { value: 'Overseer [OVR]', label: '08 - Overseer [OVR]' },
+  { value: 'Comandante [CMDT]', label: '09 - Comandante [CMDT]' },
+  { value: 'Comisionado [CMD]', label: '10 - Comisionado [CMD]' },
+  { value: 'Sub-Director [SUB-DIR]', label: '11 - Sub-Director [SUB-DIR]' },
+  { value: 'Director General [DIR]', label: '12 - Director General [DIR]' },
+];
+
 const AdminApp: React.FC = () => {
   const [tab, setTab] = useState<'users' | 'divisions'>('users');
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ full_name: '', badge_number: '', username: '', rank: 'Officer', division_id: '' });
+  const [form, setForm] = useState({ full_name: '', badge_number: '', username: '', rank: 'Enforcer I [ENF-I]', division_id: '' });
   const [divForm, setDivForm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const fetchData = async () => {
     const [pRes, dRes] = await Promise.all([
@@ -33,40 +50,27 @@ const AdminApp: React.FC = () => {
     e.preventDefault();
     if (!form.full_name.trim() || !form.badge_number.trim() || !form.username.trim()) return;
     setLoading(true);
+    setError('');
+    setSuccess('');
 
-    const email = `${form.username.trim().toLowerCase()}@mcpd.local`;
-    const tempPassword = `MCPD_${form.badge_number}_${Date.now()}`;
-
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password: tempPassword,
-      options: { data: { badge_number: form.badge_number, username: form.username } },
+    const { data, error: fnError } = await supabase.functions.invoke('create-user', {
+      body: {
+        full_name: form.full_name,
+        badge_number: form.badge_number,
+        username: form.username,
+        rank: form.rank,
+        division_id: form.division_id || null,
+      },
     });
 
-    if (authError || !authData.user) {
-      console.error('Failed to create user:', authError);
+    if (fnError || data?.error) {
+      setError(data?.error || fnError?.message || 'Failed to create user');
       setLoading(false);
       return;
     }
 
-    // Create profile
-    await supabase.from('profiles').insert({
-      user_id: authData.user.id,
-      full_name: form.full_name,
-      badge_number: form.badge_number,
-      username: form.username,
-      rank: form.rank,
-      division_id: form.division_id || null,
-      must_change_password: true,
-    });
-
-    // Assign default officer role
-    await supabase.from('user_roles').insert({
-      user_id: authData.user.id,
-      role: 'officer' as const,
-    });
-
-    setForm({ full_name: '', badge_number: '', username: '', rank: 'Officer', division_id: '' });
+    setSuccess(`User "${form.username}" created. Default password: 1234`);
+    setForm({ full_name: '', badge_number: '', username: '', rank: 'Enforcer I [ENF-I]', division_id: '' });
     setCreating(false);
     setLoading(false);
     fetchData();
@@ -92,11 +96,17 @@ const AdminApp: React.FC = () => {
         </button>
       </div>
 
+      {success && (
+        <div className="mx-3 mt-2 p-2 rounded bg-green-500/10 border border-green-500/30 text-xs font-mono text-green-400">
+          {success}
+        </div>
+      )}
+
       {tab === 'users' && (
         <div className="flex-1 flex flex-col">
           <div className="p-3 border-b border-border flex items-center justify-between">
             <span className="text-xs font-mono text-muted-foreground">{profiles.length} officers</span>
-            <Button size="sm" onClick={() => setCreating(!creating)} className="font-mono text-xs gap-1">
+            <Button size="sm" onClick={() => { setCreating(!creating); setError(''); setSuccess(''); }} className="font-mono text-xs gap-1">
               <UserPlus className="w-3 h-3" /> Create Officer
             </Button>
           </div>
@@ -106,12 +116,20 @@ const AdminApp: React.FC = () => {
               <Input placeholder="Full Name *" value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} className="bg-secondary/50 text-sm" />
               <Input placeholder="Username *" value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} className="bg-secondary/50 text-sm" />
               <Input placeholder="Badge Number *" value={form.badge_number} onChange={e => setForm(f => ({ ...f, badge_number: e.target.value }))} className="bg-secondary/50 text-sm" />
-              <Input placeholder="Rank" value={form.rank} onChange={e => setForm(f => ({ ...f, rank: e.target.value }))} className="bg-secondary/50 text-sm" />
-              <select value={form.division_id} onChange={e => setForm(f => ({ ...f, division_id: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
+              <select value={form.rank} onChange={e => setForm(f => ({ ...f, rank: e.target.value }))}
+                className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
+                {RANKS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+              <select value={form.division_id} onChange={e => setForm(f => ({ ...f, division_id: e.target.value }))}
+                className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
                 <option value="">No Division</option>
                 {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
-              <Button type="submit" className="w-full font-mono text-xs" disabled={loading}>CREATE</Button>
+              {error && <p className="text-xs text-destructive font-mono">{error}</p>}
+              <p className="text-[10px] text-muted-foreground font-mono">Default password: 1234</p>
+              <Button type="submit" className="w-full font-mono text-xs" disabled={loading}>
+                {loading ? 'CREATING...' : 'CREATE OFFICER'}
+              </Button>
             </form>
           )}
 
