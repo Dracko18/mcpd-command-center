@@ -60,13 +60,12 @@ const RecordsApp: React.FC = () => {
     return (
       <div className="p-4 h-full">
         <button onClick={() => setCreating(false)} className="flex items-center gap-1 text-xs text-primary mb-4 hover:underline">
-          <ArrowLeft className="w-3 h-3" /> Cancel
+          <ArrowLeft className="w-3 h-3" /> Cancelar
         </button>
-        <h2 className="text-sm font-mono font-semibold mb-4">NEW CRIMINAL RECORD</h2>
+        <h2 className="text-sm font-mono font-semibold mb-4">NUEVO ARCHIVO CRIMINAL</h2>
         <form onSubmit={handleCreate} className="space-y-3">
-          {/* Subject search */}
           <div>
-            <label className="text-xs font-mono text-muted-foreground">SUBJECT</label>
+            <label className="text-xs font-mono text-muted-foreground">PERSONA</label>
             {selectedSubject ? (
               <div className="flex items-center gap-2 p-2 bg-secondary/50 rounded text-sm">
                 <span>{selectedSubject.full_name}</span>
@@ -74,7 +73,7 @@ const RecordsApp: React.FC = () => {
               </div>
             ) : (
               <div className="relative">
-                <Input placeholder="Search subject..." value={subjectSearch} onChange={e => setSubjectSearch(e.target.value)} className="bg-secondary/50 text-sm" />
+                <Input placeholder="Buscar persona..." value={subjectSearch} onChange={e => setSubjectSearch(e.target.value)} className="bg-secondary/50 text-sm" />
                 {subjectResults.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded shadow-lg">
                     {subjectResults.map(s => (
@@ -86,10 +85,10 @@ const RecordsApp: React.FC = () => {
               </div>
             )}
           </div>
-          <Input placeholder="Crime Type *" value={form.crime_type} onChange={e => setForm(f => ({ ...f, crime_type: e.target.value }))} className="bg-secondary/50 text-sm" />
-          <textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={3} />
-          <textarea placeholder="Evidence" value={form.evidence} onChange={e => setForm(f => ({ ...f, evidence: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={2} />
-          <Button type="submit" className="w-full font-mono text-xs" disabled={loading || !selectedSubject}>CREATE RECORD</Button>
+          <Input placeholder="Tipo de delito *" value={form.crime_type} onChange={e => setForm(f => ({ ...f, crime_type: e.target.value }))} className="bg-secondary/50 text-sm" />
+          <textarea placeholder="Descripción" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={3} />
+          <textarea placeholder="Evidencia" value={form.evidence} onChange={e => setForm(f => ({ ...f, evidence: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={2} />
+          <Button type="submit" className="w-full font-mono text-xs" disabled={loading || !selectedSubject}>CREAR ARCHIVO</Button>
         </form>
       </div>
     );
@@ -99,9 +98,9 @@ const RecordsApp: React.FC = () => {
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border flex items-center gap-2">
         <FileText className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm font-mono font-semibold flex-1">Criminal Records</span>
+        <span className="text-sm font-mono font-semibold flex-1">Archivos Criminales</span>
         <Button size="sm" onClick={() => setCreating(true)} className="font-mono text-xs gap-1">
-          <Plus className="w-3 h-3" /> New
+          <Plus className="w-3 h-3" /> Nuevo
         </Button>
       </div>
       <ScrollArea className="flex-1">
@@ -112,12 +111,12 @@ const RecordsApp: React.FC = () => {
                 <p className="text-sm font-medium">{r.crime_type}</p>
                 <span className="text-xs text-muted-foreground font-mono">{new Date(r.date).toLocaleDateString()}</span>
               </div>
-              <p className="text-xs text-primary mt-1">Subject: {r.subject_name || 'Unknown'}</p>
+              <p className="text-xs text-primary mt-1">Persona: {r.subject_name || 'Desconocido'}</p>
               {r.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.description}</p>}
             </div>
           ))}
           {records.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-8 font-mono">No records found</p>
+            <p className="text-xs text-muted-foreground text-center py-8 font-mono">No se encontraron archivos</p>
           )}
         </div>
       </ScrollArea>

@@ -4,6 +4,7 @@ import { MCPD_APPS } from '@/config/apps';
 import { useWindowStore, type MCPDApp } from '@/stores/windowStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import mcpdLogo from '@/assets/mcpd-logo.png';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
   Users, FileText, Shield, Settings, Car, ClipboardList, ShieldAlert, Bot,
@@ -35,10 +36,13 @@ const AppLauncher: React.FC<AppLauncherProps> = ({ open, onClose }) => {
     <>
       <div className="fixed inset-0 z-[9998]" onClick={onClose} />
       <div className="absolute bottom-14 left-2 z-[9999] w-72 bg-card/95 backdrop-blur-xl border border-border rounded-lg shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-border">
-          <p className="text-sm font-semibold text-foreground">{profile?.full_name || 'Officer'}</p>
-          <p className="text-xs font-mono text-muted-foreground">Badge #{profile?.badge_number} • {profile?.rank}</p>
+        {/* Encabezado */}
+        <div className="p-4 border-b border-border flex items-center gap-3">
+          <img src={mcpdLogo} alt="MCPD" className="w-8 h-8 object-contain" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">{profile?.full_name || 'Oficial'}</p>
+            <p className="text-xs font-mono text-muted-foreground">Placa #{profile?.badge_number} • {profile?.rank}</p>
+          </div>
         </div>
 
         {/* Apps */}
@@ -58,14 +62,14 @@ const AppLauncher: React.FC<AppLauncherProps> = ({ open, onClose }) => {
           })}
         </div>
 
-        {/* Footer */}
+        {/* Pie */}
         <div className="p-2 border-t border-border">
           <button
             onClick={signOut}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-md hover:bg-destructive/20 transition-colors"
           >
             <LogOut className="w-4 h-4 text-destructive" />
-            <span className="text-xs text-destructive">Sign Out</span>
+            <span className="text-xs text-destructive">Cerrar Sesión</span>
           </button>
         </div>
       </div>

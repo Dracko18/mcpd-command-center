@@ -31,10 +31,9 @@ const AIAssistantApp: React.FC = () => {
     const allMessages = [...messages, userMsg];
 
     try {
-      // Get the user's session token
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
-      if (!accessToken) throw new Error('Not authenticated');
+      if (!accessToken) throw new Error('No autenticado');
 
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
@@ -48,7 +47,7 @@ const AIAssistantApp: React.FC = () => {
 
       if (!resp.ok || !resp.body) {
         const errData = await resp.json().catch(() => ({}));
-        throw new Error(errData.error || 'AI request failed');
+        throw new Error(errData.error || 'Error en la solicitud IA');
       }
 
       const reader = resp.body.getReader();
@@ -90,7 +89,7 @@ const AIAssistantApp: React.FC = () => {
         }
       }
     } catch (e: any) {
-      console.error('AI error:', e);
+      console.error('Error IA:', e);
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠ Error: ${e.message}` }]);
     }
     setIsLoading(false);
@@ -98,29 +97,25 @@ const AIAssistantApp: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="p-3 border-b border-border flex items-center gap-2">
         <Bot className="w-4 h-4 text-primary" />
-        <span className="text-xs font-mono font-semibold text-primary">MCPD AI ASSISTANT</span>
-        <span className="text-[10px] font-mono text-muted-foreground ml-auto">INTELLIGENCE SYSTEM v1.0</span>
+        <span className="text-xs font-mono font-semibold text-primary">MCPD ASISTENTE IA</span>
+        <span className="text-[10px] font-mono text-muted-foreground ml-auto">SISTEMA DE INTELIGENCIA v1.0</span>
       </div>
 
-      {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-auto p-3 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center opacity-50">
             <Bot className="w-10 h-10 text-primary mb-3" />
-            <p className="text-sm font-mono text-muted-foreground">MCPD AI Ready</p>
-            <p className="text-xs text-muted-foreground mt-1">Query subjects, vehicles, records, or ask for procedural guidance.</p>
+            <p className="text-sm font-mono text-muted-foreground">MCPD IA Listo</p>
+            <p className="text-xs text-muted-foreground mt-1">Consulta personas, vehículos, archivos o pide orientación operativa.</p>
           </div>
         )}
         {messages.map((msg, i) => (
           <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && <Bot className="w-5 h-5 text-primary shrink-0 mt-1" />}
             <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-              msg.role === 'user'
-                ? 'bg-primary/20 text-foreground'
-                : 'bg-secondary/60 text-foreground'
+              msg.role === 'user' ? 'bg-primary/20 text-foreground' : 'bg-secondary/60 text-foreground'
             }`}>
               <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{msg.content}</pre>
             </div>
@@ -137,12 +132,11 @@ const AIAssistantApp: React.FC = () => {
         )}
       </div>
 
-      {/* Input */}
       <form onSubmit={e => { e.preventDefault(); send(); }} className="p-3 border-t border-border flex gap-2">
         <Input
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Query the database..."
+          placeholder="Consultar la base de datos..."
           className="bg-secondary/50 text-sm flex-1 font-mono"
           disabled={isLoading}
         />
