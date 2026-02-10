@@ -76,6 +76,54 @@ export type Database = {
         }
         Relationships: []
       }
+      ia_complaints: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          complainant_name: string | null
+          complainant_type: string
+          complaint_number: string
+          created_at: string
+          description: string
+          filed_by: string
+          id: string
+          outcome: string | null
+          status: string
+          subject_officer_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          complainant_name?: string | null
+          complainant_type?: string
+          complaint_number: string
+          created_at?: string
+          description: string
+          filed_by: string
+          id?: string
+          outcome?: string | null
+          status?: string
+          subject_officer_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          complainant_name?: string | null
+          complainant_type?: string
+          complaint_number?: string
+          created_at?: string
+          description?: string
+          filed_by?: string
+          id?: string
+          outcome?: string | null
+          status?: string
+          subject_officer_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           badge_number: string
@@ -125,6 +173,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          incident_date: string | null
+          location: string | null
+          narrative: string | null
+          officer_id: string
+          report_number: string
+          report_type: string
+          status: string
+          subject_ids: string[] | null
+          supervisor_id: string | null
+          title: string
+          updated_at: string
+          vehicle_ids: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          incident_date?: string | null
+          location?: string | null
+          narrative?: string | null
+          officer_id: string
+          report_number: string
+          report_type?: string
+          status?: string
+          subject_ids?: string[] | null
+          supervisor_id?: string | null
+          title: string
+          updated_at?: string
+          vehicle_ids?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          incident_date?: string | null
+          location?: string | null
+          narrative?: string | null
+          officer_id?: string
+          report_number?: string
+          report_type?: string
+          status?: string
+          subject_ids?: string[] | null
+          supervisor_id?: string | null
+          title?: string
+          updated_at?: string
+          vehicle_ids?: string[] | null
+        }
+        Relationships: []
       }
       subjects: {
         Row: {
@@ -192,11 +291,75 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicles: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          make: string | null
+          model: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_subject_id: string | null
+          plate_number: string
+          registration_status: string
+          updated_at: string
+          updated_by: string | null
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          make?: string | null
+          model?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_subject_id?: string | null
+          plate_number: string
+          registration_status?: string
+          updated_at?: string
+          updated_by?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          make?: string | null
+          model?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_subject_id?: string | null
+          plate_number?: string
+          registration_status?: string
+          updated_at?: string
+          updated_by?: string | null
+          vin?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_owner_subject_id_fkey"
+            columns: ["owner_subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      generate_ia_number: { Args: never; Returns: string }
+      generate_report_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
