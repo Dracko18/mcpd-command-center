@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const { signIn } = useAuth();
-  const [badge, setBadge] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,13 +14,12 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!badge.trim() || !password.trim()) {
-      setError('Badge number and password are required');
+    if (!username.trim() || !password.trim()) {
+      setError('Username and password are required');
       return;
     }
     setLoading(true);
-    // We use badge@mcpd.local as the email convention
-    const email = `${badge.trim().toLowerCase()}@mcpd.local`;
+    const email = `${username.trim().toLowerCase()}@mcpd.local`;
     const { error: err } = await signIn(email, password);
     if (err) setError(err.message);
     setLoading(false);
@@ -48,11 +47,11 @@ const LoginPage: React.FC = () => {
         {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-4 bg-card/80 backdrop-blur-sm border border-border rounded-lg p-6">
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Badge Number</label>
+            <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Username</label>
             <Input
-              value={badge}
-              onChange={e => setBadge(e.target.value)}
-              placeholder="Enter badge number"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Enter username"
               className="font-mono bg-secondary/50 border-border"
               autoFocus
             />

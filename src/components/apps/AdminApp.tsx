@@ -14,7 +14,7 @@ const AdminApp: React.FC = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({ full_name: '', badge_number: '', rank: 'Officer', division_id: '' });
+  const [form, setForm] = useState({ full_name: '', badge_number: '', username: '', rank: 'Officer', division_id: '' });
   const [divForm, setDivForm] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -31,17 +31,16 @@ const AdminApp: React.FC = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.full_name.trim() || !form.badge_number.trim()) return;
+    if (!form.full_name.trim() || !form.badge_number.trim() || !form.username.trim()) return;
     setLoading(true);
 
-    // Create auth user with badge@mcpd.local email and temp password
-    const email = `${form.badge_number.trim().toLowerCase()}@mcpd.local`;
+    const email = `${form.username.trim().toLowerCase()}@mcpd.local`;
     const tempPassword = `MCPD_${form.badge_number}_${Date.now()}`;
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password: tempPassword,
-      options: { data: { badge_number: form.badge_number } },
+      options: { data: { badge_number: form.badge_number, username: form.username } },
     });
 
     if (authError || !authData.user) {
@@ -55,6 +54,7 @@ const AdminApp: React.FC = () => {
       user_id: authData.user.id,
       full_name: form.full_name,
       badge_number: form.badge_number,
+      username: form.username,
       rank: form.rank,
       division_id: form.division_id || null,
       must_change_password: true,
@@ -66,7 +66,7 @@ const AdminApp: React.FC = () => {
       role: 'officer' as const,
     });
 
-    setForm({ full_name: '', badge_number: '', rank: 'Officer', division_id: '' });
+    setForm({ full_name: '', badge_number: '', username: '', rank: 'Officer', division_id: '' });
     setCreating(false);
     setLoading(false);
     fetchData();
@@ -104,6 +104,7 @@ const AdminApp: React.FC = () => {
           {creating && (
             <form onSubmit={handleCreateUser} className="p-3 border-b border-border space-y-2 bg-secondary/20">
               <Input placeholder="Full Name *" value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} className="bg-secondary/50 text-sm" />
+              <Input placeholder="Username *" value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} className="bg-secondary/50 text-sm" />
               <Input placeholder="Badge Number *" value={form.badge_number} onChange={e => setForm(f => ({ ...f, badge_number: e.target.value }))} className="bg-secondary/50 text-sm" />
               <Input placeholder="Rank" value={form.rank} onChange={e => setForm(f => ({ ...f, rank: e.target.value }))} className="bg-secondary/50 text-sm" />
               <select value={form.division_id} onChange={e => setForm(f => ({ ...f, division_id: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm">
