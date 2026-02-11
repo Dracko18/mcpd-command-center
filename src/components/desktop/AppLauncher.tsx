@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, FileText, Shield, Settings, LogOut, Car, ClipboardList, ShieldAlert, Bot } from 'lucide-react';
+import { Users, FileText, Shield, Settings, LogOut, Car, ClipboardList, ShieldAlert, Bot, BarChart3 } from 'lucide-react';
 import { MCPD_APPS } from '@/config/apps';
 import { useWindowStore, type MCPDApp } from '@/stores/windowStore';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import mcpdLogo from '@/assets/mcpd-logo.png';
 
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
-  Users, FileText, Shield, Settings, Car, ClipboardList, ShieldAlert, Bot,
+  Users, FileText, Shield, Settings, Car, ClipboardList, ShieldAlert, Bot, BarChart3,
 };
 
 interface AppLauncherProps {

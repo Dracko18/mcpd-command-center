@@ -12,9 +12,11 @@ import InternalAffairsApp from '@/components/apps/InternalAffairsApp';
 import AdminApp from '@/components/apps/AdminApp';
 import SettingsApp from '@/components/apps/SettingsApp';
 import AIAssistantApp from '@/components/apps/AIAssistantApp';
+import DashboardApp from '@/components/apps/DashboardApp';
 import mcpdLogo from '@/assets/mcpd-logo.png';
 
 const appComponents: Record<string, React.FC> = {
+  DashboardApp,
   SubjectsApp,
   RecordsApp,
   VehiclesApp,

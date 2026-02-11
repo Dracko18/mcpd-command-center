@@ -1,6 +1,7 @@
 import type { MCPDApp } from '@/stores/windowStore';
 
 export const MCPD_APPS: MCPDApp[] = [
+  { id: 'dashboard', title: 'Dashboard', icon: 'BarChart3', component: 'DashboardApp' },
   { id: 'subjects', title: 'Base de Personas', icon: 'Users', component: 'SubjectsApp' },
   { id: 'records', title: 'Archivos Criminales', icon: 'FileText', component: 'RecordsApp' },
   { id: 'vehicles', title: 'Registro Vehicular', icon: 'Car', component: 'VehiclesApp' },
