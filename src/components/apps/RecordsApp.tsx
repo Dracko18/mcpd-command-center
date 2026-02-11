@@ -3,22 +3,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Plus, FileText, ArrowLeft } from 'lucide-react';
+import { Search, Plus, FileText, ArrowLeft, Trash2, Edit } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Tables } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 type CriminalRecord = Tables<'criminal_records'>;
 type Subject = Tables<'subjects'>;
 
+const HIGH_RANKS = ['Comisionado [CMD]', 'Sub-Director [SUB-DIR]', 'Director General [DIR]'];
+
 const RecordsApp: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [records, setRecords] = useState<(CriminalRecord & { subject_name?: string })[]>([]);
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<(CriminalRecord & { subject_name?: string }) | null>(null);
   const [subjectSearch, setSubjectSearch] = useState('');
   const [subjectResults, setSubjectResults] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [form, setForm] = useState({ crime_type: '', description: '', evidence: '' });
   const [loading, setLoading] = useState(false);
+
+  const canModify = isAdmin || HIGH_RANKS.includes(profile?.rank || '');
 
   const fetchRecords = async () => {
     const { data } = await supabase
@@ -55,6 +61,51 @@ const RecordsApp: React.FC = () => {
     setLoading(false);
     fetchRecords();
   };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing || !form.crime_type.trim()) return;
+    setLoading(true);
+    const { error } = await supabase.from('criminal_records').update({
+      crime_type: form.crime_type,
+      description: form.description || null,
+      evidence: form.evidence || null,
+    }).eq('id', editing.id);
+    if (error) { toast.error('Error al actualizar: ' + error.message); }
+    else { toast.success('Archivo actualizado'); setEditing(null); }
+    setLoading(false);
+    fetchRecords();
+  };
+
+  const handleDelete = async (record: CriminalRecord) => {
+    if (!confirm('¿Estás seguro de eliminar este archivo criminal? Esta acción no se puede deshacer.')) return;
+    const { error } = await supabase.from('criminal_records').delete().eq('id', record.id);
+    if (error) { toast.error('Error al eliminar: ' + error.message); }
+    else { toast.success('Archivo eliminado'); }
+    fetchRecords();
+  };
+
+  const startEdit = (record: CriminalRecord & { subject_name?: string }) => {
+    setForm({ crime_type: record.crime_type, description: record.description || '', evidence: record.evidence || '' });
+    setEditing(record);
+  };
+
+  if (editing) {
+    return (
+      <div className="p-4 h-full overflow-auto">
+        <button onClick={() => setEditing(null)} className="flex items-center gap-1 text-xs text-primary mb-4 hover:underline">
+          <ArrowLeft className="w-3 h-3" /> Cancelar
+        </button>
+        <h2 className="text-sm font-mono font-semibold mb-4">EDITAR ARCHIVO CRIMINAL</h2>
+        <form onSubmit={handleEdit} className="space-y-3">
+          <Input placeholder="Tipo de delito *" value={form.crime_type} onChange={e => setForm(f => ({ ...f, crime_type: e.target.value }))} className="bg-secondary/50 text-sm" />
+          <textarea placeholder="Descripción" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={3} />
+          <textarea placeholder="Evidencia" value={form.evidence} onChange={e => setForm(f => ({ ...f, evidence: e.target.value }))} className="w-full rounded-md border border-input bg-secondary/50 px-3 py-2 text-sm" rows={2} />
+          <Button type="submit" className="w-full font-mono text-xs" disabled={loading}>GUARDAR CAMBIOS</Button>
+        </form>
+      </div>
+    );
+  }
 
   if (creating) {
     return (
@@ -109,7 +160,15 @@ const RecordsApp: React.FC = () => {
             <div key={r.id} className="p-3 rounded bg-secondary/30 hover:bg-secondary/50 transition-colors">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">{r.crime_type}</p>
-                <span className="text-xs text-muted-foreground font-mono">{new Date(r.date).toLocaleDateString()}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-mono">{new Date(r.date).toLocaleDateString()}</span>
+                  {canModify && (
+                    <>
+                      <button onClick={() => startEdit(r)} className="text-xs text-primary hover:underline"><Edit className="w-3 h-3" /></button>
+                      <button onClick={() => handleDelete(r)} className="text-xs text-destructive hover:underline"><Trash2 className="w-3 h-3" /></button>
+                    </>
+                  )}
+                </div>
               </div>
               <p className="text-xs text-primary mt-1">Persona: {r.subject_name || 'Desconocido'}</p>
               {r.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{r.description}</p>}
